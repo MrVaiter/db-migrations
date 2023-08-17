@@ -42,5 +42,9 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	CopyFiles(client, another_client, "")
+	err = CopyFiles(client, another_client, "")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	Clear(another_client)
 }

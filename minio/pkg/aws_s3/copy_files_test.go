@@ -24,7 +24,7 @@ var _ = Describe("Copying files", Ordered, func() {
 
 		createdBuckets := makeRandomBuckets(from, 5)
 
-		folderPath := "/home/finn/Tasks/Migrations/test_files"
+		folderPath := "../../../test_files"
 		files, err := os.ReadDir(folderPath)
 		Expect(err).To(BeNil())
 		Expect(files).ToNot(BeNil())

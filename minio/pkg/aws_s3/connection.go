@@ -22,18 +22,8 @@ func Connect(ctx context.Context, endpoint, accessKeyID, secretAccessKey, token 
 		return nil, err
 	}
 
-	buckets, err := minioClient.ListBuckets(ctx)
-	if err != nil {
-		return nil, err
-	}
-
 	client := &Client{
 		Client:  minioClient,
-		buckets: make([]string, 0, len(buckets)),
-	}
-
-	for _, bucket := range buckets {
-		client.buckets = append(client.buckets, bucket.Name)
 	}
 
 	return client, nil

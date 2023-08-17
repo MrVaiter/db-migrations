@@ -16,7 +16,7 @@ var _ = Describe("Listing Connection", Ordered, func() {
 	var client *Client
 	var bucketName string = "eleven-test"
 	var objectName string = "11.png"
-	var filePath string = "/home/finn/Tasks/Migrations/test_files/10.png"
+	var filePath string = "../../../test_files/10.png"
 
 	BeforeAll(func() {
 		client, bucketName = setUpEnvironment(bucketName, objectName, filePath)

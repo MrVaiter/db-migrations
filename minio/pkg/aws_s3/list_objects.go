@@ -10,13 +10,18 @@ const filesBatchSize = 1000
 func (client *Client) ListFiles(ctx context.Context) ([]*FileHandle, error) {
 	handles := make([]*FileHandle, 0, filesBatchSize)
 
-	for _, bucket := range client.buckets {
+	buckets, err := client.ListBuckets(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	for _, bucket := range buckets {
 
 		hasMore := true
 		continueFrom := ""
 
 		for hasMore {
-			objectsCh := client.ListObjects(ctx, bucket, minio.ListObjectsOptions{
+			objectsCh := client.ListObjects(ctx, bucket.Name, minio.ListObjectsOptions{
 				WithVersions: false,
 				WithMetadata: false,
 				Recursive:    true,
@@ -32,7 +37,7 @@ func (client *Client) ListFiles(ctx context.Context) ([]*FileHandle, error) {
 				}
 
 				handles = append(handles, &FileHandle{
-					bucketName: bucket,
+					bucketName: bucket.Name,
 					fileName:   object.Key,
 					size:       object.Size,
 				})
