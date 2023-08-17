@@ -1,0 +1,49 @@
+version: '2'
+
+networks:
+  app-tier:
+    driver: bridge
+    name: minio-network
+
+services:
+  minio:
+    image: 'bitnami/minio:latest'
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    environment:
+      - MINIO_ROOT_USER=minio-root-user
+      - MINIO_ROOT_PASSWORD=minio-root-password
+      - MINIO_DEFAULT_BUCKETS=one:public,two:public,three:public,four:public,five:public,six:public,seven:public,eight:public,nine:public,ten:public
+    networks:
+      - app-tier
+    volumes:
+      - buckets_config:/data
+      - certs:/certs
+  minio1:
+    image: 'bitnami/minio:latest'
+    ports:
+      - '9002:9000'
+      - '9003:9001'
+    environment:
+      - MINIO_ROOT_USER=minio-root-user
+      - MINIO_ROOT_PASSWORD=minio-root-password
+    networks:
+      - app-tier
+    volumes:
+      - buckets_config1:/data
+      - certs1:/certs
+
+volumes:
+  buckets_config:
+    driver: local
+    name: buckets_config
+  certs:
+    driver: local
+    name: certs
+  buckets_config1:
+    driver: local
+    name: buckets_config1
+  certs1:
+    driver: local
+    name: certs1
