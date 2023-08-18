@@ -25,9 +25,9 @@ var _ = Describe("Deleting buckets", func() {
 		Expect(err).To(BeNil())
 		Expect(client).NotTo(BeNil())
 
-		makeRandomBuckets(client, 5)
+		client.makeRandomBuckets(5)
 
-		err = clear(client)
+		err = client.ClearWithSuffix("-test-")
 		Expect(err).To(BeNil())
 		
 		buckets, err := client.ListBuckets(context.Background())

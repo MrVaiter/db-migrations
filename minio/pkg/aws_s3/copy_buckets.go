@@ -8,7 +8,10 @@ import (
 	"github.com/minio/minio-go/v7"
 )
 
-func CopyBuckets(from *Client, to *Client, filter string) error {
+type CopyPredicate func(string) bool
+type ClearPredicate func(string) bool
+
+func (from *Client) CopyBucketsWithFilter(to *Client, filter CopyPredicate) error {
 
 	ctx := context.Background()
 
@@ -20,10 +23,10 @@ func CopyBuckets(from *Client, to *Client, filter string) error {
 	}
 
 	for _, bucket := range buckets {
-		if strings.Contains(bucket.Name, filter) {
+		if filter(bucket.Name) {
 			fmt.Print(bucket.Name)
 
-			if !checkBucket(to, bucket.Name) {
+			if !to.BucketExists(bucket.Name) {
 				err = to.MakeBucket(ctx, bucket.Name, minio.MakeBucketOptions{})
 				if err != nil {
 					fmt.Println(" failed")
@@ -40,9 +43,15 @@ func CopyBuckets(from *Client, to *Client, filter string) error {
 	return nil
 }
 
-func checkBucket(client *Client, bucketName string) bool {
+func (from *Client) CopyBucketsWithSuffix(to *Client, suffix string) error {
+	return from.CopyBucketsWithFilter(to, func(name string) bool {
+		return strings.Contains(name, suffix)
+	})
+}
 
-	result, err := client.BucketExists(context.Background(), bucketName)
+func (client *Client) BucketExists(bucketName string) bool {
+
+	result, err := client.Client.BucketExists(context.Background(), bucketName)
 	if err != nil {
 		panic(err)
 	}
@@ -50,7 +59,7 @@ func checkBucket(client *Client, bucketName string) bool {
 	return result
 }
 
-func clear(client *Client) error {
+func (client *Client) ClearWithFilter(filter ClearPredicate) error {
 
 	buckets, err := client.ListBuckets(context.Background())
 	if err != nil {
@@ -58,7 +67,7 @@ func clear(client *Client) error {
 	}
 
 	for _, bucket := range buckets {
-		if strings.Contains(bucket.Name, "-test-") {
+		if filter(bucket.Name) {
 			err = client.RemoveBucketWithOptions(context.Background(), bucket.Name, minio.RemoveBucketOptions{ForceDelete: true})
 			if err != nil {
 				return err
@@ -67,4 +76,10 @@ func clear(client *Client) error {
 	}
 
 	return nil
+}
+
+func (client *Client) ClearWithSuffix(suffix string) error {
+	return client.ClearWithFilter(func(name string) bool {
+		return strings.Contains(name, suffix)
+	})
 }

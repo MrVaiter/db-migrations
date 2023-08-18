@@ -25,30 +25,29 @@ var _ = Describe("Copying buckets", Ordered, func() {
 		Expect(err).To(BeNil())
 		Expect(to).NotTo(BeNil())
 
-		copiedBuckets = makeRandomBuckets(from, 10)
+		copiedBuckets = from.makeRandomBuckets(10)
 	})
 
 	It("Can copy buckets", func() {
-		err = CopyBuckets(from, to, "-test-")
+		err = from.CopyBucketsWithSuffix(to, "-test-")
 		Expect(err).To(BeNil())
 
 		for _, bucket := range copiedBuckets {
-			result, err := to.BucketExists(context.Background(), bucket)
+			result := to.BucketExists(bucket)
 			Expect(result).To(BeTrue())
-			Expect(err).To(BeNil())
 		}
 	})
 
 	AfterAll(func() {
-		err = clear(from)
+		err = from.ClearWithSuffix("")
 		Expect(err).To(BeNil())
 
-		err = clear(to)
+		err = to.ClearWithSuffix("")
 		Expect(err).To(BeNil())
 	})
 })
 
-func makeRandomBuckets(client *Client, amount int) []string {
+func (client *Client) makeRandomBuckets(amount int) []string {
 
 	if amount <= 0 {
 		return nil

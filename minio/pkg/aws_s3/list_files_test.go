@@ -39,7 +39,7 @@ var _ = Describe("Listing Connection", Ordered, func() {
 	})
 
 	AfterAll(func() {
-		err := clear(client)
+		err := client.ClearWithSuffix("")
 		Expect(err).To(BeNil())
 	})
 })
@@ -63,7 +63,7 @@ func setUpEnvironment(bucketName string, objectName string, filePath string) (*C
 	err = client.MakeBucket(context.Background(), bucketName, minio.MakeBucketOptions{})
 	Expect(err).To(BeNil())
 
-	err = uploadFile(client, bucketName, objectName, filePath)
+	err = client.uploadFile(bucketName, objectName, filePath)
 	Expect(err).To(BeNil())
 
 	return client, bucketName

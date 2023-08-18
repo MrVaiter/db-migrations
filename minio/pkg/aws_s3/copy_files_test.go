@@ -22,7 +22,7 @@ var _ = Describe("Copying files", Ordered, func() {
 		Expect(err).To(BeNil())
 		Expect(to).NotTo(BeNil())
 
-		createdBuckets := makeRandomBuckets(from, 5)
+		createdBuckets := from.makeRandomBuckets(5)
 
 		folderPath := "../../../test_files"
 		files, err := os.ReadDir(folderPath)
@@ -34,7 +34,7 @@ var _ = Describe("Copying files", Ordered, func() {
 			for _, fileName := range files {
 
 				filePath := folderPath + "/" + fileName.Name()
-				err = uploadFile(from, bucket, fileName.Name(), filePath)
+				err = from.uploadFile(bucket, fileName.Name(), filePath)
 				Expect(err).To(BeNil())
 			}
 
@@ -42,15 +42,15 @@ var _ = Describe("Copying files", Ordered, func() {
 	})
 
 	It("Can copy files", func() {
-		err = CopyFiles(from, to, "-test-")
+		err = from.CopyFiles(to, "-test-")
 		Expect(err).To(BeNil())
 	})
 
 	AfterAll(func() {
-		err = clear(from)
+		err = from.ClearWithSuffix("")
 		Expect(err).To(BeNil())
 
-		err = clear(to)
+		err = to.ClearWithSuffix("")
 		Expect(err).To(BeNil())
 	})
 })

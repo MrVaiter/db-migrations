@@ -9,10 +9,10 @@ import (
 	"github.com/minio/minio-go/v7"
 )
 
-func CopyFiles(from *Client, to *Client, filter string) error {
+func (from *Client) CopyFiles(to *Client, filter string) error {
 	ctx := context.Background()
 
-	err := CopyBuckets(from, to, filter)
+	err := from.CopyBucketsWithSuffix(to, filter)
 	if err != nil {
 		return err
 	}
@@ -60,19 +60,6 @@ func CopyFiles(from *Client, to *Client, filter string) error {
 	return nil
 }
 
-func Clear(to *Client) {
-	buckets, err := to.ListBuckets(context.Background())
-	if err != nil {
-		panic(err)
-	}
-	for _, bucket := range buckets {
-		err = to.RemoveBucketWithOptions(context.Background(), bucket.Name, minio.RemoveBucketOptions{ForceDelete: true})
-		if err != nil {
-			panic(err)
-		}
-	}
-}
-
 func isContain(list []*FileHandle, object *FileHandle) bool {
 	for _, file := range list {
 		if file.bucketName == object.bucketName && file.fileName == object.fileName {
@@ -83,7 +70,7 @@ func isContain(list []*FileHandle, object *FileHandle) bool {
 	return false
 }
 
-func uploadFile(client *Client, bucketName string, fileName string, filePath string) error {
+func (client *Client) uploadFile(bucketName string, fileName string, filePath string) error {
 	// Upload test object
 	file, err := os.Open(filePath)
 	if err != nil {
