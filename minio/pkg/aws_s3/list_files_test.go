@@ -19,7 +19,7 @@ var _ = Describe("Listing Connection", Ordered, func() {
 	var filePath string = "../../../test_files/10.png"
 
 	BeforeAll(func() {
-		client, bucketName = setUpEnvironment(bucketName, objectName, filePath)
+		client, bucketName = setUpEnvironment(context.Background() ,bucketName, objectName, filePath)
 	})
 
 	It("Can list buckets", func() {
@@ -39,12 +39,12 @@ var _ = Describe("Listing Connection", Ordered, func() {
 	})
 
 	AfterAll(func() {
-		err := client.ClearWithSuffix("")
+		err := client.ClearWithSuffix(context.Background(), "")
 		Expect(err).To(BeNil())
 	})
 })
 
-func setUpEnvironment(bucketName string, objectName string, filePath string) (*Client, string) {
+func setUpEnvironment(ctx context.Context, bucketName string, objectName string, filePath string) (*Client, string) {
 	endpoint, ok := os.LookupEnv("S3_ENDPOINT")
 	Expect(ok).To(BeTrue())
 
@@ -60,10 +60,10 @@ func setUpEnvironment(bucketName string, objectName string, filePath string) (*C
 	bucketName = fmt.Sprintf("%v-test-%v", bucketName, rand.Intn(100))
 
 	// Create test bucket
-	err = client.MakeBucket(context.Background(), bucketName, minio.MakeBucketOptions{})
+	err = client.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
 	Expect(err).To(BeNil())
 
-	err = client.uploadFile(bucketName, objectName, filePath)
+	err = client.uploadFile(ctx ,bucketName, objectName, filePath)
 	Expect(err).To(BeNil())
 
 	return client, bucketName

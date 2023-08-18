@@ -1,23 +1,26 @@
 package aws_s3
 
 import (
+	"bytes"
 	"context"
-	"fmt"
 	"os"
 	"strings"
 
 	"github.com/minio/minio-go/v7"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
-func (from *Client) CopyFiles(to *Client, filter string) error {
-	ctx := context.Background()
+func (from *Client) CopyFiles(ctx context.Context, to *Client, filter string) error {
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
-	err := from.CopyBucketsWithSuffix(to, filter)
+	err := from.CopyBucketsWithSuffix(context.Background(), to, filter)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("\nStarting copying files from", from.EndpointURL().Host, "to", to.EndpointURL().Host)
+	log.Print("Starting copying files from ", from.EndpointURL().Host, " to ", to.EndpointURL().Host)
 	fromFiles, err := from.ListFiles(ctx)
 	if err != nil {
 		return err
@@ -28,11 +31,12 @@ func (from *Client) CopyFiles(to *Client, filter string) error {
 		return err
 	}
 
+	var buffer bytes.Buffer
 	for _, file := range fromFiles {
 
 		if strings.Contains(file.bucketName, filter) {
 
-			fmt.Print(file.bucketName, "/", file.fileName)
+			buffer.WriteString(file.bucketName + "/" + file.fileName)
 			if !isContain(toFiles, file) {
 				reader, err := from.readObject(ctx, file)
 				if err != nil {
@@ -46,15 +50,20 @@ func (from *Client) CopyFiles(to *Client, filter string) error {
 					file.size,
 					minio.PutObjectOptions{})
 				if err != nil {
-					fmt.Println(" failed")
+					buffer.WriteString(" \tfailed")
+					log.Error().Msg(buffer.String())
+					buffer.Reset()
 					return err
 				}
 
-				fmt.Println(" success")
+				buffer.WriteString(" \tsuccess")
 			} else {
-				fmt.Println(" already exists")
+				buffer.WriteString(" \talready exists")
 			}
 		}
+
+		log.Info().Msg(buffer.String())
+		buffer.Reset()
 	}
 
 	return nil
@@ -70,7 +79,7 @@ func isContain(list []*FileHandle, object *FileHandle) bool {
 	return false
 }
 
-func (client *Client) uploadFile(bucketName string, fileName string, filePath string) error {
+func (client *Client) uploadFile(ctx context.Context, bucketName string, fileName string, filePath string) error {
 	// Upload test object
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -84,7 +93,7 @@ func (client *Client) uploadFile(bucketName string, fileName string, filePath st
 		return err
 	}
 
-	_, err = client.PutObject(context.Background(),
+	_, err = client.PutObject(ctx,
 		bucketName,
 		fileName,
 		file,

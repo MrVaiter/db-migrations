@@ -42,7 +42,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	err = client.CopyFiles(another_client, "")
+	err = client.CopyFiles(context.Background() ,another_client, "")
 	if err != nil {
 		log.Fatalln(err)
 	}

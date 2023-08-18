@@ -29,20 +29,21 @@ var _ = Describe("Copying buckets", Ordered, func() {
 	})
 
 	It("Can copy buckets", func() {
-		err = from.CopyBucketsWithSuffix(to, "-test-")
+		err = from.CopyBucketsWithSuffix(context.Background() ,to, "-test-")
 		Expect(err).To(BeNil())
 
 		for _, bucket := range copiedBuckets {
-			result := to.BucketExists(bucket)
+			result, err := to.BucketExists(context.Background(), bucket)
 			Expect(result).To(BeTrue())
+			Expect(err).To(BeNil())
 		}
 	})
 
 	AfterAll(func() {
-		err = from.ClearWithSuffix("")
+		err = from.ClearWithSuffix(context.Background(), "")
 		Expect(err).To(BeNil())
 
-		err = to.ClearWithSuffix("")
+		err = to.ClearWithSuffix(context.Background(), "")
 		Expect(err).To(BeNil())
 	})
 })

@@ -9,6 +9,8 @@ require (
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/pprof v0.0.0-20210407192527-94a9f03dee38 // indirect
+	github.com/mattn/go-colorable v0.1.12 // indirect
+	github.com/mattn/go-isatty v0.0.14 // indirect
 	golang.org/x/tools v0.9.3 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
@@ -27,6 +29,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.11.0
 	github.com/onsi/gomega v1.27.10
 	github.com/rs/xid v1.5.0 // indirect
+	github.com/rs/zerolog v1.30.0
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	golang.org/x/crypto v0.11.0 // indirect
 	golang.org/x/net v0.12.0 // indirect
