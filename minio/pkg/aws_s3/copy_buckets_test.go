@@ -29,7 +29,7 @@ var _ = Describe("Copying buckets", Ordered, func() {
 	})
 
 	It("Can copy buckets", func() {
-		err = from.CopyBucketsWithSuffix(context.Background() ,to, "-test-")
+		err = from.CopyBucketsWithSuffix(context.Background(), to, "-test-")
 		Expect(err).To(BeNil())
 
 		for _, bucket := range copiedBuckets {
@@ -40,10 +40,10 @@ var _ = Describe("Copying buckets", Ordered, func() {
 	})
 
 	AfterAll(func() {
-		err = from.ClearWithSuffix(context.Background(), "")
+		err = from.ClearWithSuffix(context.Background(), "-test-")
 		Expect(err).To(BeNil())
 
-		err = to.ClearWithSuffix(context.Background(), "")
+		err = to.ClearWithSuffix(context.Background(), "-test-")
 		Expect(err).To(BeNil())
 	})
 })

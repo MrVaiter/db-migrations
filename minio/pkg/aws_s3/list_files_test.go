@@ -19,7 +19,7 @@ var _ = Describe("Listing Connection", Ordered, func() {
 	var filePath string = "../../../test_files/10.png"
 
 	BeforeAll(func() {
-		client, bucketName = setUpEnvironment(context.Background() ,bucketName, objectName, filePath)
+		client, bucketName = setUpEnvironment(context.Background(), bucketName, objectName, filePath)
 	})
 
 	It("Can list buckets", func() {
@@ -39,7 +39,7 @@ var _ = Describe("Listing Connection", Ordered, func() {
 	})
 
 	AfterAll(func() {
-		err := client.ClearWithSuffix(context.Background(), "")
+		err := client.ClearWithSuffix(context.Background(), "-test-")
 		Expect(err).To(BeNil())
 	})
 })
@@ -63,7 +63,7 @@ func setUpEnvironment(ctx context.Context, bucketName string, objectName string,
 	err = client.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
 	Expect(err).To(BeNil())
 
-	err = client.uploadFile(ctx ,bucketName, objectName, filePath)
+	err = client.uploadFile(ctx, bucketName, objectName, filePath)
 	Expect(err).To(BeNil())
 
 	return client, bucketName

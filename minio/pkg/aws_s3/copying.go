@@ -13,8 +13,6 @@ type copyQueue struct {
 	fromClient *Client
 	toClient   *Client
 
-	//toClientBlob *BlobClient // TODO: copy to BlobStore
-
 	ctx    context.Context
 	cancel context.CancelFunc
 }
@@ -23,44 +21,65 @@ func (q *copyQueue) toCopy(jobs []*FileHandle) {
 	var wg sync.WaitGroup
 	wg.Add(len(jobs))
 
-	// Simplify ???
-	go func(jobs []*FileHandle) {
-		for _, job := range jobs {
-			q.jobs <- job // ???
-		}
-		wg.Done()
-	}(jobs)
-
-	// Cancellation ???
 	go func() {
-		wg.Wait()
-		q.cancel()
+
+		for _, job := range jobs {
+			q.jobs <- job
+			wg.Done()
+		}
+		
 	}()
+
+	wg.Wait()
 }
 
 func (q *copyQueue) doCopy(ctx context.Context, results *[]*CopyResult) bool { // TODO: return results ???
-	for {
+
+	loops := len(q.jobs)
+
+	var currentBucket string
+	for i := 0; i < loops; i++ {
+
 		select {
 		// if context was canceled.
 		case <-q.ctx.Done():
-			return true // TODO: why true ?
+			return true
 		// if job received.
 		case job := <-q.jobs:
 
-			// TODO: create buckets
+			result := &CopyResult{
+				FileHandle: *job,
+			}
 
-			// Copy Here
+			if currentBucket != job.bucketName {
+				err := q.toClient.MakeBucket(ctx, job.bucketName, minio.MakeBucketOptions{})
+				currentBucket = job.bucketName
+
+				if err != nil {
+					result.Err = err
+					*results = append(*results, result)
+					continue
+				}
+			}
+
 			reader, err := q.fromClient.readObject(ctx, job)
 			if err != nil {
-				// Log + acc errors
+				result.Err = err
+				*results = append(*results, result)
+				continue
 			}
 
 			err = q.toClient.writeObject(ctx, reader, job)
 			if err != nil {
-				// Log + acc errors
+				result.Err = err
+				*results = append(*results, result)
+				continue
 			}
+
 		}
 	}
+
+	return true
 }
 
 func (client *Client) readObject(ctx context.Context, handle *FileHandle) (io.Reader, error) {
@@ -122,7 +141,7 @@ func (client *Client) CopyBuckets(ctx context.Context, to *Client, overwrite boo
 	}
 
 	queue := &copyQueue{
-		jobs:       make(chan *FileHandle, len(toCopy)/3),
+		jobs:       make(chan *FileHandle, len(toCopy)),
 		fromClient: client,
 		toClient:   to,
 		ctx:        ctx,
@@ -131,9 +150,14 @@ func (client *Client) CopyBuckets(ctx context.Context, to *Client, overwrite boo
 
 	queue.toCopy(toCopy)
 
-	//go queue.doCopy(ctx)
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		queue.doCopy(ctx, &results)
+		wg.Done()
+	}()
 
-	// CopyResults ???
+	wg.Wait()
 
-	return nil, nil
+	return results, nil
 }

@@ -1,7 +1,6 @@
 package aws_s3
 
 import (
-	"bytes"
 	"context"
 	"os"
 	"strings"
@@ -14,47 +13,36 @@ import (
 type CopyPredicate func(string) bool
 type ClearPredicate func(string) bool
 
-func (from *Client) CopyBucketsWithFilter(ctx context.Context,to *Client, filter CopyPredicate) error {
+func (from *Client) CopyBucketsWithFilter(ctx context.Context, to *Client, filter CopyPredicate) error {
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
-
-
-	log.Print("Starting copying buckets from ", from.EndpointURL().Host, " to ", to.EndpointURL().Host)
 
 	buckets, err := from.ListBuckets(ctx)
 	if err != nil {
 		return err
 	}
 
-	var buffer bytes.Buffer
 	for _, bucket := range buckets {
 		if filter(bucket.Name) {
-			buffer.WriteString(bucket.Name)
-			
-			exist, err := to.BucketExists(context.Background() ,bucket.Name)
-			if  !exist {
+
+			exist, err := to.BucketExists(context.Background(), bucket.Name)
+			if !exist {
 				err = to.MakeBucket(ctx, bucket.Name, minio.MakeBucketOptions{})
 				if err != nil {
-					buffer.WriteString(" \tfailed")
-					log.Error().Msg(buffer.String())
-					buffer.Reset()
 					return err
 				}
 
-				buffer.WriteString(" \tsuccess")
+				log.Debug().Str("bucket", bucket.Name).Msg("Success")
 			} else {
-				buffer.WriteString(" \talready exists")
+				log.Debug().Str("bucket", bucket.Name).Msg("Already exists")
 			}
 		}
-
-		log.Info().Msg(buffer.String())
-		buffer.Reset()
 	}
 
 	return nil
 }
 
-func (from *Client) CopyBucketsWithSuffix(ctx context.Context,to *Client, suffix string) error {
+func (from *Client) CopyBucketsWithSuffix(ctx context.Context, to *Client, suffix string) error {
 	return from.CopyBucketsWithFilter(ctx, to, func(name string) bool {
 		return strings.Contains(name, suffix)
 	})

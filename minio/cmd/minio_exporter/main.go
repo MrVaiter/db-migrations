@@ -16,15 +16,15 @@ func main() {
 	}
 
 	endpoint, ok := os.LookupEnv("S3_ENDPOINT")
-	if !ok { 
+	if !ok {
 		panic("S3_ENDPOINT missing!")
 	}
 	accessKeyID, ok := os.LookupEnv("S3_ACCESS_KEY_ID")
-	if !ok{ 
+	if !ok {
 		panic("S3_ACCESS_KEY_ID missing!")
 	}
 	secretAccessKey, ok := os.LookupEnv("S3_SECRET_KEY_ID")
-	if !ok { 
+	if !ok {
 		panic("S3_SECRET_KEY_ID missing!")
 	}
 
@@ -33,18 +33,23 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	another_client, err := Connect(context.Background(), 
-												"localhost:9002", 
-  												"RFhwTT46QbsUlnCT3BYV", 
-												"tgshup5CoKMJHxjlIUPsIRIun50sqR2ZI3lrN6Hd", 
-												"")
+	another_client, err := Connect(context.Background(),
+		"localhost:9002",
+		"RFhwTT46QbsUlnCT3BYV",
+		"tgshup5CoKMJHxjlIUPsIRIun50sqR2ZI3lrN6Hd",
+		"")
+
+	// TODO: delete
+	another_client.ClearWithSuffix(context.Background(), "")
+
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	err = client.CopyFiles(context.Background() ,another_client, "")
+	_, err = client.CopyBuckets(context.Background(), another_client, false)
 	if err != nil {
 		log.Fatalln(err)
 	}
+
 	// Clear(another_client)
 }

@@ -34,7 +34,7 @@ var _ = Describe("Copying files", Ordered, func() {
 			for _, fileName := range files {
 
 				filePath := folderPath + "/" + fileName.Name()
-				err = from.uploadFile(context.Background() ,bucket, fileName.Name(), filePath)
+				err = from.uploadFile(context.Background(), bucket, fileName.Name(), filePath)
 				Expect(err).To(BeNil())
 			}
 
@@ -42,15 +42,15 @@ var _ = Describe("Copying files", Ordered, func() {
 	})
 
 	It("Can copy files", func() {
-		err = from.CopyFiles(context.Background() ,to, "-test-")
+		err = from.CopyFiles(context.Background(), to, "-test-")
 		Expect(err).To(BeNil())
 	})
 
 	AfterAll(func() {
-		err = from.ClearWithSuffix(context.Background(), "")
+		err = from.ClearWithSuffix(context.Background(), "-test-")
 		Expect(err).To(BeNil())
 
-		err = to.ClearWithSuffix(context.Background(), "")
+		err = to.ClearWithSuffix(context.Background(), "-test-")
 		Expect(err).To(BeNil())
 	})
 })

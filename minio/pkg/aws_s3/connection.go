@@ -23,7 +23,7 @@ func Connect(ctx context.Context, endpoint, accessKeyID, secretAccessKey, token 
 	}
 
 	client := &Client{
-		Client:  minioClient,
+		Client: minioClient,
 	}
 
 	return client, nil

@@ -29,7 +29,7 @@ var _ = Describe("Deleting buckets", func() {
 
 		err = client.ClearWithSuffix(context.Background(), "-test-")
 		Expect(err).To(BeNil())
-		
+
 		buckets, err := client.ListBuckets(context.Background())
 		Expect(err).To(BeNil())
 

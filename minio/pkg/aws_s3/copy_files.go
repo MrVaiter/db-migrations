@@ -1,7 +1,6 @@
 package aws_s3
 
 import (
-	"bytes"
 	"context"
 	"os"
 	"strings"
@@ -20,7 +19,6 @@ func (from *Client) CopyFiles(ctx context.Context, to *Client, filter string) er
 		return err
 	}
 
-	log.Print("Starting copying files from ", from.EndpointURL().Host, " to ", to.EndpointURL().Host)
 	fromFiles, err := from.ListFiles(ctx)
 	if err != nil {
 		return err
@@ -31,12 +29,10 @@ func (from *Client) CopyFiles(ctx context.Context, to *Client, filter string) er
 		return err
 	}
 
-	var buffer bytes.Buffer
 	for _, file := range fromFiles {
 
 		if strings.Contains(file.bucketName, filter) {
 
-			buffer.WriteString(file.bucketName + "/" + file.fileName)
 			if !isContain(toFiles, file) {
 				reader, err := from.readObject(ctx, file)
 				if err != nil {
@@ -50,20 +46,15 @@ func (from *Client) CopyFiles(ctx context.Context, to *Client, filter string) er
 					file.size,
 					minio.PutObjectOptions{})
 				if err != nil {
-					buffer.WriteString(" \tfailed")
-					log.Error().Msg(buffer.String())
-					buffer.Reset()
 					return err
 				}
 
-				buffer.WriteString(" \tsuccess")
+				log.Debug().Str("file", file.fileName).Str("bucket", file.bucketName).Msg("Success")
 			} else {
-				buffer.WriteString(" \talready exists")
+				log.Debug().Str("file", file.fileName).Str("bucket", file.bucketName).Msg("Already exists")
 			}
 		}
 
-		log.Info().Msg(buffer.String())
-		buffer.Reset()
 	}
 
 	return nil
