@@ -50,6 +50,5 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-
-	// Clear(another_client)
+	
 }

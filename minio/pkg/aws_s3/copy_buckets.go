@@ -26,6 +26,10 @@ func (from *Client) CopyBucketsWithFilter(ctx context.Context, to *Client, filte
 		if filter(bucket.Name) {
 
 			exist, err := to.BucketExists(context.Background(), bucket.Name)
+			if err != nil {
+				return err
+			}
+			
 			if !exist {
 				err = to.MakeBucket(ctx, bucket.Name, minio.MakeBucketOptions{})
 				if err != nil {

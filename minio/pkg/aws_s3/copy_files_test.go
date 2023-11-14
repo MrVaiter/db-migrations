@@ -42,7 +42,7 @@ var _ = Describe("Copying files", Ordered, func() {
 	})
 
 	It("Can copy files", func() {
-		err = from.CopyFiles(context.Background(), to, "-test-")
+		_, err = from.CopyBuckets(context.Background(), to, false)
 		Expect(err).To(BeNil())
 	})
 
